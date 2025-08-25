@@ -1,0 +1,10 @@
+artifact_location: file:///E:/udemyFinal/Networksecurity/mlruns/0/models/m-3b0bc5390be94ef9a237dd01a773ed6e/artifacts
+creation_timestamp: 1756095907912
+experiment_id: '0'
+last_updated_timestamp: 1756095910706
+model_id: m-3b0bc5390be94ef9a237dd01a773ed6e
+model_type: null
+name: model
+source_run_id: cfa4daf322e9425baad0d0a8fd2e9be3
+status: 2
+status_message: null
