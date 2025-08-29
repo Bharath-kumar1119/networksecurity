@@ -49,7 +49,7 @@ templates = Jinja2Templates(directory = "./templates")
 
 @app.get("/", tags=["authentication"])
 async def index():
-    return RedirectResponse(url = "/'docs")
+    return RedirectResponse(url = "/docs")
 
 @app.get("/train")
 async def train_model():
@@ -61,7 +61,7 @@ async def train_model():
     except Exception as e:
         raise NetworkSecurityException(e,sys)
     
-@app.get("/predict")
+@app.post("/predict")
 async def predict_route(request:Request,file:UploadFile=File(...)):
     try:
         df=pd.read_csv(file.file)

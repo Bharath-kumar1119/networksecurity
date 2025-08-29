@@ -24,9 +24,14 @@ from sklearn.ensemble import (
     RandomForestClassifier,
 )
 import mlflow
+from urllib.parse import urlparse
+import joblib
 
 import dagshub
-dagshub.init(repo_owner='Bharath-kumar1119', repo_name='networksecurity', mlflow=True)
+# dagshub.init(repo_owner='Bharath-kumar1119', repo_name='networksecurity', mlflow=True)
+os.environ["MLFLOW_TRACKING_URI"]="https://dagshub.com/Bharath-kumar1119/networksecurity.mlflow"
+os.environ["MLFLOW_TRACKING_USERNAME"]="Bharath-kumar1119"
+os.environ["MLFLOW_TRACKING_PASSWORD"]="c0fbdd9b51a0495731dfa9c0755bc3148f87e8cd"
 
 class ModelTrainer:
     def __init__(self,model_trainer_config:ModelTrainerConfig,
@@ -37,19 +42,22 @@ class ModelTrainer:
 
         except Exception as e:
             raise NetworkSecurityException(e,sys)
-        
+    
     def track_mlflow(self, best_model, classificationmetric):
-            with mlflow.start_run():
-                f1_score = classificationmetric.f1_score
-                precision_score = classificationmetric.precision_score
-                recall_score = classificationmetric.recall_score
+        try:
+            with  mlflow.start_run():
+            # Log metrics
+                mlflow.log_metric("f1_score", classificationmetric.f1_score)
+                mlflow.log_metric("precision_score", classificationmetric.precision_score)
+                mlflow.log_metric("recall_score", classificationmetric.recall_score)
 
-                mlflow.log_metric("f1_score", f1_score)
-                mlflow.log_metric("precision_score", precision_score)
-                mlflow.log_metric("recall_score", recall_score)
-                mlflow.sklearn.log_model(best_model, "model")
+                model_path = "model.pkl"
+                joblib.dump(best_model,model_path)
+                
+                mlflow.log_artifact(model_path, artifact_path="model")
 
-
+        except Exception as e:
+            raise NetworkSecurityException(e, sys)
 
     def train_model(self,X_train,y_train,x_test,y_test):
         models = {
@@ -133,6 +141,8 @@ class ModelTrainer:
         logging.info(f"Model trainer Artifact: {model_trainer_artifact}")
         return model_trainer_artifact
 
+
+
     def initiate_model_trainer(self)-> ModelTrainerArtifact:
         try:
             train_file_path = self.data_transformation_artifact.transformed_train_file_path
@@ -151,5 +161,6 @@ class ModelTrainer:
 
             model_trainer_artifact = self.train_model(x_train,y_train,x_test,y_test)
             return model_trainer_artifact
+        
         except Exception as e:
             raise NetworkSecurityException(e,sys)
