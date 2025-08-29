@@ -24,7 +24,9 @@ from sklearn.ensemble import (
     RandomForestClassifier,
 )
 import mlflow
-from sklearn.metrics import f1_score,precision_score,recall_score
+
+import dagshub
+dagshub.init(repo_owner='Bharath-kumar1119', repo_name='networksecurity', mlflow=True)
 
 class ModelTrainer:
     def __init__(self,model_trainer_config:ModelTrainerConfig,
@@ -116,8 +118,12 @@ class ModelTrainer:
         os.makedirs(model_dir_path,exist_ok=True)
 
         Network_model = NetworkModel(preprocessor=preprocessor,model=best_model)
-        save_object(self.model_trainer_config.trained_model_file_path,obj=NetworkModel)
-
+        save_object(self.model_trainer_config.trained_model_file_path,obj=Network_model)
+        
+        #model pusher
+        save_object("final_model/model.pkl",best_model)
+        
+        
         ## model train Artifact
 
         model_trainer_artifact = ModelTrainerArtifact(trained_model_file_path=self.model_trainer_config.trained_model_file_path,
@@ -143,6 +149,7 @@ class ModelTrainer:
                 test_arr[:, -1],
             )
 
-            model = self.train_model(x_train,y_train,x_test,y_test)
+            model_trainer_artifact = self.train_model(x_train,y_train,x_test,y_test)
+            return model_trainer_artifact
         except Exception as e:
             raise NetworkSecurityException(e,sys)
